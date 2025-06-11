@@ -1,5 +1,6 @@
 streamlit
 wikipedia
 requests
-pillow
+Pillow 
 pyttsx3
+openai
