@@ -1,7 +1,7 @@
 streamlit
 wikipedia
 requests
-gTTS
 Pillow
+gTTS
 streamlit_extras
 openai
