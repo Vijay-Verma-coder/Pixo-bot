@@ -2,5 +2,6 @@ streamlit
 wikipedia
 requests
 gTTS
+Pillow
 streamlit_extras
 openai
