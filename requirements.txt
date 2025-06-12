@@ -3,5 +3,6 @@ wikipedia
 requests
 Pillow
 gTTS
+plotly
 streamlit_extras
-openai
+
