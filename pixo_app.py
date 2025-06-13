@@ -1,6 +1,6 @@
 import streamlit as st import openai import requests from PIL import Image from io import BytesIO import pyttsx3 import time
 
-Set API key from secrets
+openai.api_key = st.secrets["openai"]["api_key"]
 
 openai.api_key = st.secrets["openai_key"]
 
