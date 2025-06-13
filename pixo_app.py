@@ -1,120 +1,71 @@
-import streamlit as st
-import requests
-import wikipedia
-from PIL import Image
-from io import BytesIO
-import pyttsx3
-import openai
-from datetime import datetime
+import streamlit as st import openai import requests from PIL import Image from io import BytesIO import pyttsx3 import time
 
-# ✅ Updated OpenAI setup
-client = openai.OpenAI(api_key=st.secrets["openai_key"])
+Set API key from secrets
 
-# 🎨 Art Forms
+openai.api_key = st.secrets["openai_key"]
+
+Art forms and countries
+
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
 
-# 🌍 194 Countries + World
-COUNTRIES = ["World", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
-    "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados",
-    "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil",
-    "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada",
-    "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
-    "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
-    "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
-    "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
-    "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India",
-    "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan",
-    "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia",
-    "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali",
-    "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco",
-    "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands",
-    "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan",
-    "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
-    "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent", "Samoa",
-    "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone",
-    "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan",
-    "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan",
-    "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey",
-    "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States",
-    "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
+Load countries list from file (make sure you uploaded 'countries.txt')
 
-# 🎉 App UI
-st.set_page_config(page_title="Pixo Bot", page_icon="🎨", layout="centered")
+with open("countries.txt", "r") as f: COUNTRIES = [line.strip() for line in f.readlines()]
 
-st.markdown("## 🤖 Welcome to Pixo Bot!")
-st.markdown("### Learn about the Revolution of Art Forms 🌍🎭")
-st.markdown("")
+Title and dropdowns
 
-# 🎭 Dropdowns
-art_form = st.selectbox("🎨 Choose an Art Form", ART_FORMS)
-country = st.selectbox("🌍 Choose a Country", COUNTRIES)
+st.title("🎨 Pixo Bot - Art Revolution Explorer") st.markdown("<style>div.stTitle {text-align: center;}</style>", unsafe_allow_html=True)
 
-# 🎤 Voice greeting
-def speak(text):
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
+art_form = st.selectbox("Choose an Art Form", ART_FORMS) country = st.selectbox("Choose a Country", COUNTRIES)
 
-# 😄 Bot Face + Greeting
-with st.container():
-    st.markdown("### 😊 Hi! I'm Pixo! Let's explore art together.")
-    st.image("https://i.imgur.com/VtuZVbI.png", width=100)
+Auto greeting with bot emoji
 
-# 🔍 Wikipedia + Image
-def get_content_and_image(art_form, country):
-    topic = f"{art_form} in {country}" if country != "World" else f"{art_form} in the world"
-    try:
-        summary = wikipedia.summary(topic, sentences=10)
-    except:
-        summary = f"Sorry, I couldn't find detailed information about {art_form} in {country}."
+if art_form and country: st.markdown("### 🤖 Hello! Let’s explore the art revolution of {} in {}!".format(art_form, country))
 
-    try:
-        page = wikipedia.page(topic)
-        image_url = page.images[0] if page.images else None
-    except:
-        image_url = None
+Function to fetch description from ChatGPT
 
-    return summary, image_url
+def get_art_revolution_description(art_form, country): prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline." response = openai.ChatCompletion.create( model="gpt-4", messages=[{"role": "user", "content": prompt}] ) return response.choices[0].message.content
 
-# 🖼️ Display Results
-if art_form and country:
-    st.markdown(f"### 📜 Revolution of {art_form} in {country}")
-    summary, img_url = get_content_and_image(art_form, country)
-    st.write(summary)
+Function to get image from Unsplash
 
-    if img_url:
-        image = Image.open(BytesIO(requests.get(img_url).content))
-        st.image(image, use_column_width=True)
+def get_art_image(art_form, country): search_term = f"{art_form} in {country}" url = f"https://source.unsplash.com/800x400/?{search_term}" return url
 
-    # 🕰️ Timeline (Simple Version)
-    st.markdown("### ⏳ Timeline of Evolution")
-    st.markdown(f"- **Ancient Period** – Early roots of {art_form}")
-    st.markdown(f"- **Medieval Era** – Growth through kingdoms/empires")
-    st.markdown(f"- **Modern Age** – Major revolutions and global spread")
-    st.markdown(f"- **Present Day** – {art_form} in current culture")
+Display fetched data
 
-    # 🗣️ Speak content
-    if st.button("🔊 Speak Summary"):
-        speak(summary)
+if art_form and country: with st.spinner("Fetching art revolution details..."): content = get_art_revolution_description(art_form, country) img_url = get_art_image(art_form, country)
 
-# 🧠 AI Query Box
-st.markdown("### 💬 Having any query related do ask here")
-user_input = st.text_input("Ask about the revolution of art forms (after selecting above):")
+st.image(img_url, caption=f"{art_form} in {country}", use_column_width=True)
+st.markdown(f"### 📜 Revolution of {art_form} in {country}")
+st.write(content)
 
-# 🔊 Voice controls
-if user_input:
-    st.markdown("🤖 Thinking...")
+# Timeline (just a visual separator for now)
+st.markdown("---")
+st.markdown("### 📅 Timeline")
+st.write("(Timeline details included in the explanation above)")
 
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": f"You are an expert in the history and revolution of art. Only answer about {art_form} in {country}."},
-            {"role": "user", "content": user_input}
-        ]
-    )
-    final_answer = response.choices[0].message.content
-    st.markdown("### 🤖 Pixo Says:")
-    st.write(final_answer)
+Query Section
 
-    if st.button("🗣 Speak Answer"):
-        speak(final_answer)
+if art_form and country: st.markdown("---") st.markdown("### ❓ Ask me anything about this art revolution") st.markdown("Having any query related do ask here 🗣️") query = st.text_input("Your Question:")
+
+if query:
+    with st.spinner("Thinking..."):
+        followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
+        reply = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": followup}]
+        )
+        answer = reply.choices[0].message.content
+        st.success(answer)
+
+    # Voice Controls
+    st.markdown("---")
+    st.markdown("### 🔊 Voice Controls")
+    if st.button("Speak Answer"):
+        engine = pyttsx3.init()
+        engine.say(answer)
+        engine.runAndWait()
+    if st.button("Pause"):
+        st.warning("⏸️ Pause not available on Streamlit Cloud")
+    if st.button("Stop"):
+        st.warning("⏹️ Stop not available on Streamlit Cloud")
+
