@@ -1,8 +1,4 @@
 streamlit
-wikipedia
-requests
-Pillow
+openai
 gTTS
 plotly
-streamlit_extras
-
