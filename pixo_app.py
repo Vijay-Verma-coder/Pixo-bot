@@ -3,8 +3,7 @@ import openai
 import requests
 from PIL import Image
 from io import BytesIO
-import pyttsx3
-import time
+import time  # ✅ pyttsx3 removed — it's not supported on Streamlit Cloud
 
 # ✅ Set API key from secrets
 openai.api_key = st.secrets["openai"]["api_key"]
@@ -74,13 +73,11 @@ if art_form and country:
             answer = reply.choices[0].message.content
             st.success(answer)
 
-        # ✅ Voice Controls
+        # ✅ Voice Controls (adjusted for Streamlit Cloud)
         st.markdown("---")
         st.markdown("### 🔊 Voice Controls")
         if st.button("Speak Answer"):
-            engine = pyttsx3.init()
-            engine.say(answer)
-            engine.runAndWait()
+            st.warning("🔈 Voice not supported on Streamlit Cloud.")
         if st.button("Pause"):
             st.warning("⏸️ Pause not available on Streamlit Cloud")
         if st.button("Stop"):
