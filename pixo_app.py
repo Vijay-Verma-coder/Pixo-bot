@@ -26,14 +26,15 @@ country = st.selectbox("Choose a Country", COUNTRIES)
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to fetch description from ChatGPT
+# ✅ Function to fetch description from ChatGPT (old API style)
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}]
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=prompt,
+        max_tokens=700
     )
-    return response.choices[0].message.content
+    return response.choices[0].text.strip()
 
 # ✅ Function to get image from Unsplash
 def get_art_image(art_form, country):
@@ -66,11 +67,12 @@ if art_form and country:
     if query:
         with st.spinner("Thinking..."):
             followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": followup}]
+            reply = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=followup,
+                max_tokens=700
             )
-            answer = reply.choices[0].message.content
+            answer = reply.choices[0].text.strip()
             st.success(answer)
 
         # ✅ Voice Controls (adjusted for Streamlit Cloud)
