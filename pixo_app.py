@@ -5,45 +5,34 @@ from PIL import Image
 from io import BytesIO
 import time
 
-# ✅ Secure API key from Streamlit secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+# ✅ Use new OpenAI client with key from Streamlit secrets
+client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-# ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
 
-# ✅ Load countries list from file
 with open("countries.txt", "r") as f:
     COUNTRIES = [line.strip() for line in f.readlines()]
 
-# ✅ App Title
 st.title("🎨 Pixo Bot - Art Revolution Explorer")
 st.markdown("<style>div.stTitle {text-align: center;}</style>", unsafe_allow_html=True)
 
-# ✅ Dropdowns
 art_form = st.selectbox("Choose an Art Form", ART_FORMS)
 country = st.selectbox("Choose a Country", COUNTRIES)
 
-# ✅ Greeting
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to get art revolution details
 def get_art_revolution_description(art_form, country):
-    prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = openai.chat.completions.create(
+    prompt = f"Explain the historical revolution of {art_form} in {country}, with key points and a timeline."
+    resp = client.chat.completions.create(
         model="gpt-4",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
+        messages=[{"role": "user", "content": prompt}]
     )
-    return response.choices[0].message.content
+    return resp.choices[0].message.content
 
-# ✅ Function to get Unsplash image
 def get_art_image(art_form, country):
-    url = f"https://source.unsplash.com/800x400/?{art_form},{country}"
-    return url
+    return f"https://source.unsplash.com/800x400/?{art_form},{country}"
 
-# ✅ Show content
 if art_form and country:
     with st.spinner("Fetching art revolution details..."):
         content = get_art_revolution_description(art_form, country)
@@ -55,30 +44,21 @@ if art_form and country:
 
     st.markdown("---")
     st.markdown("### 📅 Timeline")
-    st.write("(Timeline included in the above explanation.)")
+    st.write("(Timeline included above)")
 
-# ✅ Query box
 if art_form and country:
     st.markdown("---")
-    st.markdown("### ❓ Ask me anything about this art revolution")
-    st.markdown("Having any query related do ask here 🗣️")
-    query = st.text_input("Your Question:")
+    st.markdown("### ❓ Ask a follow-up question")
+    query = st.text_input("Your question:")
 
     if query:
         with st.spinner("Thinking..."):
-            followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = openai.chat.completions.create(
+            resp = client.chat.completions.create(
                 model="gpt-4",
-                messages=[{"role": "user", "content": followup}]
+                messages=[{"role": "user", "content": query}]
             )
-            answer = reply.choices[0].message.content
-            st.success(answer)
+            st.success(resp.choices[0].message.content)
 
-        st.markdown("---")
-        st.markdown("### 🔊 Voice Controls")
-        if st.button("Speak Answer"):
-            st.warning("🔈 Voice not supported on Streamlit Cloud.")
-        if st.button("Pause"):
-            st.warning("⏸️ Pause not available on Streamlit Cloud.")
-        if st.button("Stop"):
-            st.warning("⏹️ Stop not available on Streamlit Cloud.")
+    st.markdown("---")
+    st.markdown("### 🔊 Voice Controls")
+    st.warning("Voice not supported on Streamlit Cloud.")
