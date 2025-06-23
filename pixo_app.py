@@ -5,28 +5,29 @@ from PIL import Image
 from io import BytesIO
 import time
 
-# ✅ Create OpenAI client with secure key from secrets
-client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
+# ✅ Correct way to read OpenAI key from secrets.toml
+client = openai.OpenAI(api_key=st.secrets["api_key"])
 
 # ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
 
-# ✅ Load countries list from file (make sure you uploaded 'countries.txt')
+# ✅ Load countries list from file
 with open("countries.txt", "r") as f:
     COUNTRIES = [line.strip() for line in f.readlines()]
 
-# ✅ Title and dropdowns
-st.title("🎨 Pixo Bot - Art Revolution Explorer")
+# ✅ App Title
+st.title("🤖 Pixo Bot - Art Revolution Explorer")
 st.markdown("<style>div.stTitle {text-align: center;}</style>", unsafe_allow_html=True)
 
+# ✅ Dropdowns
 art_form = st.selectbox("Choose an Art Form", ART_FORMS)
 country = st.selectbox("Choose a Country", COUNTRIES)
 
-# ✅ Auto greeting
+# ✅ Auto Greeting
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to fetch description from ChatGPT
+# ✅ Get description using GPT-4
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
     response = client.chat.completions.create(
@@ -35,13 +36,13 @@ def get_art_revolution_description(art_form, country):
     )
     return response.choices[0].message.content
 
-# ✅ Function to get image from Unsplash
+# ✅ Get image from Unsplash
 def get_art_image(art_form, country):
     search_term = f"{art_form} in {country}"
     url = f"https://source.unsplash.com/800x400/?{search_term}"
     return url
 
-# ✅ Display fetched data
+# ✅ Display content
 if art_form and country:
     with st.spinner("Fetching art revolution details..."):
         content = get_art_revolution_description(art_form, country)
@@ -51,7 +52,7 @@ if art_form and country:
     st.markdown(f"### 📜 Revolution of {art_form} in {country}")
     st.write(content)
 
-    # ✅ Timeline section
+    # Timeline
     st.markdown("---")
     st.markdown("### 📅 Timeline")
     st.write("(Timeline details included in the explanation above)")
@@ -73,7 +74,7 @@ if art_form and country:
             answer = reply.choices[0].message.content
             st.success(answer)
 
-        # ✅ Voice Controls (disabled for Streamlit Cloud)
+        # Voice Controls (disabled on Streamlit Cloud)
         st.markdown("---")
         st.markdown("### 🔊 Voice Controls")
         if st.button("Speak Answer"):
