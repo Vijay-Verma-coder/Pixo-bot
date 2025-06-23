@@ -3,6 +3,7 @@ import openai
 import requests
 from PIL import Image
 from io import BytesIO
+from urllib.parse import quote
 
 # ✅ Set your API key from Streamlit secrets
 openai.api_key = st.secrets["openai"]["api_key"]
@@ -27,14 +28,16 @@ if art_form and country:
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",  # Ensure you have access to this model
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
 
 # ✅ Image from Unsplash
 def get_art_image(art_form, country):
-    url = f"https://source.unsplash.com/800x400/?{art_form},{country}"
+    art_form_encoded = quote(art_form)
+    country_encoded = quote(country)
+    url = f"https://source.unsplash.com/800x400/?{art_form_encoded},{country_encoded}"
     return url
 
 # ✅ Display content
@@ -63,7 +66,7 @@ if art_form and country:
         with st.spinner("Thinking..."):
             followup = f"You're an expert in art history. Based on {art_form} in {country}, answer: {query}"
             reply = openai.ChatCompletion.create(
-                model="gpt-4",
+                model="gpt-3.5-turbo",  # Ensure you have access to this model
                 messages=[{"role": "user", "content": followup}]
             )
             st.success(reply.choices[0].message.content)
@@ -77,3 +80,4 @@ if art_form and country:
         st.warning("⏸️ Pause not available on Streamlit Cloud")
     if st.button("Stop"):
         st.warning("⏹️ Stop not available on Streamlit Cloud")
+        
