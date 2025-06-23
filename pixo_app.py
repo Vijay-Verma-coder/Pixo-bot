@@ -29,7 +29,7 @@ if art_form and country:
 # ✅ Function to fetch description from ChatGPT
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
@@ -66,7 +66,7 @@ if art_form and country:
     if query:
         with st.spinner("Thinking..."):
             followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = openai.ChatCompletion.create(
+            reply = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": followup}]
             )
