@@ -1,12 +1,12 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 import requests
 from PIL import Image
 from io import BytesIO
 import time
 
-# ✅ Set API key from secrets
-client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+# ✅ Secure API key from secrets.toml
+openai.api_key = st.secrets["openai"]["api_key"]
 
 # ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
@@ -22,14 +22,14 @@ st.markdown("<style>div.stTitle {text-align: center;}</style>", unsafe_allow_htm
 art_form = st.selectbox("Choose an Art Form", ART_FORMS)
 country = st.selectbox("Choose a Country", COUNTRIES)
 
-# ✅ Auto greeting with bot emoji
+# ✅ Auto greeting
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to fetch description from ChatGPT
+# ✅ Function to fetch description
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = client.chat.completions.create(
+    response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
@@ -66,14 +66,14 @@ if art_form and country:
     if query:
         with st.spinner("Thinking..."):
             followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = client.chat.completions.create(
+            reply = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": followup}]
             )
             answer = reply.choices[0].message.content
             st.success(answer)
 
-        # ✅ Voice Controls (adjusted for Streamlit Cloud)
+        # ✅ Voice Controls (not supported on Streamlit Cloud)
         st.markdown("---")
         st.markdown("### 🔊 Voice Controls")
         if st.button("Speak Answer"):
