@@ -5,8 +5,8 @@ from PIL import Image
 from io import BytesIO
 import time
 
-# ✅ Secure API key from secrets.toml
-openai.api_key = st.secrets["openai"]["api_key"]
+# ✅ Create OpenAI client with secure key from secrets
+client = openai.OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
@@ -26,10 +26,10 @@ country = st.selectbox("Choose a Country", COUNTRIES)
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to fetch description
+# ✅ Function to fetch description from ChatGPT
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}]
     )
@@ -66,14 +66,14 @@ if art_form and country:
     if query:
         with st.spinner("Thinking..."):
             followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = openai.ChatCompletion.create(
+            reply = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": followup}]
             )
             answer = reply.choices[0].message.content
             st.success(answer)
 
-        # ✅ Voice Controls (not supported on Streamlit Cloud)
+        # ✅ Voice Controls (disabled for Streamlit Cloud)
         st.markdown("---")
         st.markdown("### 🔊 Voice Controls")
         if st.button("Speak Answer"):
