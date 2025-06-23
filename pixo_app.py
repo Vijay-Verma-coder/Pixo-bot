@@ -5,13 +5,13 @@ from PIL import Image
 from io import BytesIO
 from urllib.parse import quote
 
-# ✅ Set your API key from Streamlit secrets
+# ✅ Secure API key
 openai.api_key = st.secrets["openai"]["api_key"]
 
 # ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
 
-# ✅ Load countries from countries.txt
+# ✅ Load countries
 with open("countries.txt", "r") as f:
     COUNTRIES = [line.strip() for line in f.readlines()]
 
@@ -24,23 +24,21 @@ country = st.selectbox("Choose a Country", COUNTRIES)
 if art_form and country:
     st.markdown(f"### 🤖 Let’s explore the {art_form} revolution in {country}!")
 
-# ✅ Function to get description
+# ✅ Description
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # Ensure you have access to this model
+        model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
 
-# ✅ Image from Unsplash
+# ✅ Unsplash image
 def get_art_image(art_form, country):
-    art_form_encoded = quote(art_form)
-    country_encoded = quote(country)
-    url = f"https://source.unsplash.com/800x400/?{art_form_encoded},{country_encoded}"
+    url = f"https://source.unsplash.com/800x400/?{quote(art_form)},{quote(country)}"
     return url
 
-# ✅ Display content
+# ✅ Show results
 if art_form and country:
     with st.spinner("Fetching revolution details..."):
         content = get_art_revolution_description(art_form, country)
@@ -50,12 +48,11 @@ if art_form and country:
     st.markdown("### 📜 Art Revolution Summary")
     st.write(content)
 
-    # ✅ Timeline section
     st.markdown("---")
     st.markdown("### 📅 Timeline")
     st.write("(Included in the explanation above)")
 
-# ✅ Query box
+# ✅ Query
 if art_form and country:
     st.markdown("---")
     st.markdown("### ❓ Ask anything about this art revolution")
@@ -66,12 +63,11 @@ if art_form and country:
         with st.spinner("Thinking..."):
             followup = f"You're an expert in art history. Based on {art_form} in {country}, answer: {query}"
             reply = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # Ensure you have access to this model
+                model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": followup}]
             )
             st.success(reply.choices[0].message.content)
 
-    # ✅ Voice controls (disabled for Streamlit Cloud)
     st.markdown("---")
     st.markdown("### 🔊 Voice Controls")
     if st.button("Speak Answer"):
@@ -80,4 +76,3 @@ if art_form and country:
         st.warning("⏸️ Pause not available on Streamlit Cloud")
     if st.button("Stop"):
         st.warning("⏹️ Stop not available on Streamlit Cloud")
-        
