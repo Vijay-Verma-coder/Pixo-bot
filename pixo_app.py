@@ -3,7 +3,7 @@ import openai
 import requests
 from PIL import Image
 from io import BytesIO
-import time  # ✅ pyttsx3 removed — it's not supported on Streamlit Cloud
+import time
 
 # ✅ Set API key from secrets
 openai.api_key = st.secrets["openai"]["api_key"]
