@@ -1,12 +1,12 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import requests
 from PIL import Image
 from io import BytesIO
 import time
 
 # ✅ Set API key from secrets
-openai.api_key = st.secrets["openai"]["api_key"]
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 # ✅ Art forms and countries
 ART_FORMS = ["Music", "Dance", "Painting", "Architecture", "Literature", "Sculpture"]
@@ -26,15 +26,14 @@ country = st.selectbox("Choose a Country", COUNTRIES)
 if art_form and country:
     st.markdown(f"### 🤖 Hello! Let’s explore the art revolution of {art_form} in {country}!")
 
-# ✅ Function to fetch description from ChatGPT (old API style)
+# ✅ Function to fetch description from ChatGPT
 def get_art_revolution_description(art_form, country):
     prompt = f"Give a simplified, clear explanation of the historical revolution of {art_form} in {country}, with important points and a timeline."
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=prompt,
-        max_tokens=700
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message.content
 
 # ✅ Function to get image from Unsplash
 def get_art_image(art_form, country):
@@ -67,12 +66,11 @@ if art_form and country:
     if query:
         with st.spinner("Thinking..."):
             followup = f"You are an expert on art revolutions. Based on earlier, answer this related question clearly: {query}"
-            reply = openai.Completion.create(
-                model="text-davinci-003",
-                prompt=followup,
-                max_tokens=700
+            reply = client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": followup}]
             )
-            answer = reply.choices[0].text.strip()
+            answer = reply.choices[0].message.content
             st.success(answer)
 
         # ✅ Voice Controls (adjusted for Streamlit Cloud)
